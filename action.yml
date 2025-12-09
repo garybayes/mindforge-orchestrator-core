@@ -1,0 +1,26 @@
+---
+name: "Orchestrator Core"
+description: "Core engine for issue classification, milestone enforcement, stale detection, and telemetry writing."
+
+author: "MindForge / Codex"
+runs:
+  using: "node20"
+  main: "dist/index.js"
+
+inputs:
+  config-path:
+    description: "Path to .github/orchestrator.yml"
+    default: ".github/orchestrator.yml"
+    required: false
+
+  event-name:
+    description: "GitHub event name (override for debugging)"
+    required: false
+
+outputs:
+  result:
+    description: "Summary of actions taken"
+
+branding:
+  icon: "cpu"
+  color: "purple"
