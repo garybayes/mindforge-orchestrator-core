@@ -11,7 +11,13 @@ import { writeTelemetry } from "./telemetry";
 import { OrchestratorResult, TelemetryPayload } from "./types";
 import { github as ghClient } from "./githubClient";
 
-async function run() {
+export async function run(deps: {
+  context: any;
+  getInput: (name: string) => string;
+  setOutput: (name: string, value: string) => void;
+  setFailed: (message: string) => void;
+}) {
+  const { context, getInput, setOutput, setFailed } = deps;
   const env = getEnv();
   const token = env.GITHUB_TOKEN;
   const octokit = new Octokit({
