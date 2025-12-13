@@ -2,7 +2,7 @@
 
 import * as core from "@actions/core";
 import * as gha from "@actions/github";
-import type { Octokit } from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 import { env } from "./env";
 import { logger } from "./logger";
 import { loadConfig } from "./config";
@@ -176,20 +176,31 @@ async function run() {
 run();
 
 export interface RunCoreInput {
-  octokit: Octokit;
   owner: string;
   repo: string;
   issue: any;
+  githubToken?: string;
 }
 
 export async function runCore(input: RunCoreInput) {
-  const { octokit, owner, repo, issue } = input;
+  const { owner, repo, issue, githubToken } = input;
 
   const config = loadConfig(".github/orchestrator.yml");
 
   const labels = (issue.labels || []).map((l: any) =>
     typeof l === "string" ? l : l.name
   );
+  const token =
+    input.githubToken ??
+    process.env.GITHUB_TOKEN;
+
+  if (!token) {
+    throw new Error(
+      "No GitHub token provided. " +
+      "Provide githubToken when running as a GitHub App."
+    );
+  }
+  const octokit = new Octokit({ auth: token });
   const repoRef = { owner, repo };
   const classification = classifyIssue(config, labels);
 
