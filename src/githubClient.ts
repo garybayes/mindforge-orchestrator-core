@@ -2,32 +2,13 @@
  * githubClient.ts
  * GitHub API abstraction for orchestrator-core.
  *
- * Provides a typed, error-safe wrapper around Octokit
- * and normalizes error output using OrchestratorError.
+ * Provides typed, error-safe helpers around Octokit.
+ * No global state. No implicit auth. Fully injectable.
  */
 
-import { Octokit } from "@octokit/rest";
-import { getEnv } from "./env";
+import type { Octokit } from "@octokit/rest";
 import { logger } from "./logger";
-import {
-  githubApiError,
-  OrchestratorError,
-} from "./errors";
-
-/**
- * Create the Octokit client using the validated GITHUB_TOKEN.
- * Future expansion: support GitHub App installation tokens.
- */
-function createOctokit(): Octokit {
-  logger.debug("Initializing Octokit GitHub client...");
-  const env = getEnv();
-  return new Octokit({
-    auth: env.GITHUB_TOKEN,
-    userAgent: "mindforge-orchestrator-core/1.0.0",
-  });
-}
-
-const client = createOctokit();
+import { githubApiError } from "./errors";
 
 /**
  * Wrapper around Octokit API calls to normalize errors.
@@ -50,15 +31,22 @@ async function safeCall<T>(
 }
 
 /**
- * Exported GitHub API client with safe helpers.
+ * GitHub API helper functions.
+ * Octokit must be provided by the caller.
  */
 export const github = {
-  raw: client,
-
-  async getIssue(owner: string, repo: string, issueNumber: number) {
+  /**
+   * Fetch a single issue.
+   */
+  async getIssue(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    issueNumber: number
+  ) {
     return safeCall(
       () =>
-        client.issues.get({
+        octokit.issues.get({
           owner,
           repo,
           issue_number: issueNumber,
@@ -67,7 +55,11 @@ export const github = {
     );
   },
 
+  /**
+   * Update an issue.
+   */
   async updateIssue(
+    octokit: Octokit,
     owner: string,
     repo: string,
     issueNumber: number,
@@ -75,7 +67,7 @@ export const github = {
   ) {
     return safeCall(
       () =>
-        client.issues.update({
+        octokit.issues.update({
           owner,
           repo,
           issue_number: issueNumber,
@@ -85,10 +77,17 @@ export const github = {
     );
   },
 
-  async listLabels(owner: string, repo: string) {
+  /**
+   * List all labels in a repository.
+   */
+  async listLabels(
+    octokit: Octokit,
+    owner: string,
+    repo: string
+  ) {
     return safeCall(
       () =>
-        client.issues.listLabelsForRepo({
+        octokit.issues.listLabelsForRepo({
           owner,
           repo,
         }),
@@ -96,7 +95,11 @@ export const github = {
     );
   },
 
+  /**
+   * Add labels to an issue.
+   */
   async addLabels(
+    octokit: Octokit,
     owner: string,
     repo: string,
     issueNumber: number,
@@ -104,7 +107,7 @@ export const github = {
   ) {
     return safeCall(
       () =>
-        client.issues.addLabels({
+        octokit.issues.addLabels({
           owner,
           repo,
           issue_number: issueNumber,
@@ -114,7 +117,11 @@ export const github = {
     );
   },
 
+  /**
+   * Remove a label from an issue.
+   */
   async removeLabel(
+    octokit: Octokit,
     owner: string,
     repo: string,
     issueNumber: number,
@@ -122,7 +129,7 @@ export const github = {
   ) {
     return safeCall(
       () =>
-        client.issues.removeLabel({
+        octokit.issues.removeLabel({
           owner,
           repo,
           issue_number: issueNumber,

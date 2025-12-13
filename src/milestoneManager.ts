@@ -5,6 +5,8 @@
  * Provides safe, structured wrappers around GitHub milestone operations.
  */
 
+import { Octokit } from "@octokit/rest";
+import { getEnv } from "./env"
 import { github } from "./githubClient";
 import { logger } from "./logger";
 import {
@@ -21,9 +23,15 @@ export interface RepoRef {
  * Fetch all milestones for a repo.
  */
 async function listMilestones(ref: RepoRef) {
+  const env = getEnv();
+  const token = env.GITHUB_TOKEN;
+  const octokit = new Octokit({
+    auth: token,
+    userAgent: "mindforge-orchestrator-core/1.0.0",
+  });
   logger.debug(`Listing milestones for ${ref.owner}/${ref.repo}`);
   try {
-    const res = await github.raw.issues.listMilestones({
+    const res = await octokit.issues.listMilestones({
       owner: ref.owner,
       repo: ref.repo,
       state: "open",
@@ -56,6 +64,7 @@ async function findMilestoneByTitle(
  * Creates a milestone if it doesn't already exist.
  */
 export async function ensureMilestone(
+  octokit: Octokit,
   ref: RepoRef,
   title: string
 ): Promise<number> {
@@ -69,7 +78,7 @@ export async function ensureMilestone(
 
   logger.info(`Creating milestone '${title}'`);
   try {
-    const res = await github.raw.issues.createMilestone({
+    const res = await octokit.issues.createMilestone({
       owner: ref.owner,
       repo: ref.repo,
       title,
@@ -87,6 +96,7 @@ export async function ensureMilestone(
  * Attaches a milestone to an issue.
  */
 export async function attachMilestoneToIssue(
+  octokit: Octokit,
   ref: RepoRef,
   issueNumber: number,
   milestoneNumber: number
@@ -96,7 +106,7 @@ export async function attachMilestoneToIssue(
   );
 
   try {
-    await github.raw.issues.update({
+    await octokit.issues.update({
       owner: ref.owner,
       repo: ref.repo,
       issue_number: issueNumber,

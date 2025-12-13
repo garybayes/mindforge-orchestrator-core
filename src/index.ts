@@ -14,9 +14,14 @@ import { OrchestratorResult, TelemetryPayload } from "./types";
 import { github as ghClient } from "./githubClient";
 
 async function run() {
+  const env = getEnv();
+  const token = env.GITHUB_TOKEN;
+  const octokit = new Octokit({
+    auth: token,
+    userAgent: "mindforge-orchestrator-core/1.0.0",
+  });
   try {
     logger.info("🚀 Orchestrator-core starting...");
-    const env = getEnv();
     logger.debug(`Run mode: ${env.ORCHESTRATOR_RUN_MODE}`);
 
     const configPath =
@@ -66,7 +71,7 @@ async function run() {
       logger.info(
         `Applying missing track label: ${classification.trackLabelToApply}`
       );
-      await ghClient.addLabels(owner, repo, issue.number, [
+      await ghClient.addLabels(octokit, owner, repo, issue.number, [
         classification.trackLabelToApply,
       ]);
       classification.actions.push(
@@ -93,10 +98,12 @@ async function run() {
         );
 
         const milestoneNumber = await ensureMilestone(
+          octokit,
           { owner, repo },
           desiredMilestoneTitle
         );
         await attachMilestoneToIssue(
+          octokit,
           { owner, repo },
           issue.number,
           milestoneNumber
@@ -220,10 +227,12 @@ export async function runCore(input: RunCoreInput) {
   const desiredMilestone = inferMilestoneTitle(config, classification.track);
   if (desiredMilestone) {
     const milestoneNumber = await ensureMilestone(
+      octokit,
       repoRef,
       desiredMilestone
     );
     await attachMilestoneToIssue(
+      octokit,
       repoRef,
       issue.number,
       milestoneNumber
