@@ -29,15 +29,14 @@ export async function run(deps: {
     logger.debug(`Run mode: ${env.ORCHESTRATOR_RUN_MODE}`);
 
     const configPath =
-      core.getInput("config-path") || ".github/orchestrator.yml";
+      getInput?.("config-path") || ".github/orchestrator.yml";
     const config = loadConfig(configPath);
 
-    const ctx = gha.context;
-    const issue = ctx.payload.issue as any;
+    const issue = context?.payload?.issue;
 
     if (!issue) {
-      core.info(
-        "No issue in event payload. This action should be triggered by an issue event."
+      logger.info(
+        "No issue in event payload - skipping execution."
       );
       return;
     }
