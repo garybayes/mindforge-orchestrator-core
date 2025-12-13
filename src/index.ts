@@ -272,12 +272,6 @@ export function runAction(deps: {
   setOutput: (name: string, value: string) => void;
   setFailed: (message: string) => void;
 }) {
-  const env = getEnv();
-
-  if (env.ORCHESTRATOR_RUN_MODE !== "action") {
-    logger.debug("Skipping runAction (not in action mode)");
-    return;
-  }
 
   const { context, getInput, setOutput, setFailed } = deps;
 
