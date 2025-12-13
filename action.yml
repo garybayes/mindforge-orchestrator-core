@@ -5,7 +5,7 @@ description: "Core engine for issue classification, milestone enforcement, stale
 author: "MindForge / Codex"
 runs:
   using: "node20"
-  main: "dist/index.js"
+  main: "dist/action.js"
 
 inputs:
   config-path:

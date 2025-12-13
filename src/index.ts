@@ -181,12 +181,6 @@ async function run() {
   }
 }
 
-const env = getEnv();
-
-if (env.ORCHESTRATOR_RUN_MODE === "action") {
-  run();
-}
-
 export interface RunCoreInput {
   owner: string;
   repo: string;
@@ -268,4 +262,21 @@ export async function runCore(input: RunCoreInput) {
     classification,
     milestone: desiredMilestone
   };
+}
+
+/**
+ * GitHub Action entrypoint.
+ * This must ONLY run when invoked by GitHub Actions.
+ */
+export function runAction() {
+  const env = getEnv();
+
+  if (env.ORCHESTRATOR_RUN_MODE !== "action") {
+    logger.debug(
+      `Skipping runAction (mode=${env.ORCHESTRATOR_RUN_MODE})`
+    );
+    return;
+  }
+
+  run();
 }
