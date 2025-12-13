@@ -4,7 +4,6 @@ import * as core from "@actions/core";
 import * as gha from "@actions/github";
 import { Octokit } from "@octokit/rest";
 import { getEnv } from "./env";
-const env = getEnv();
 import { logger } from "./logger";
 import { loadConfig } from "./config";
 import { classifyIssue } from "./issueClassifier";
@@ -17,6 +16,7 @@ import { github as ghClient } from "./githubClient";
 async function run() {
   try {
     logger.info("🚀 Orchestrator-core starting...");
+    const env = getEnv();
     logger.debug(`Run mode: ${env.ORCHESTRATOR_RUN_MODE}`);
 
     const configPath =
@@ -191,6 +191,7 @@ export async function runCore(input: RunCoreInput) {
   const labels = (issue.labels || []).map((l: any) =>
     typeof l === "string" ? l : l.name
   );
+  const env = getEnv();
   const token =
     input.githubToken ??
     process.env.GITHUB_TOKEN;

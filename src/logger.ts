@@ -8,7 +8,6 @@
 
 import { OrchestratorError } from "./errors";
 import { getEnv } from "./env";
-const env = getEnv();
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -74,5 +73,5 @@ class Logger {
  * - In production: debug disabled unless explicitly set
  */
 export const logger = new Logger({
-  debug: env.NODE_ENV === "development"
+  debug: process.env.NODE_ENV === "development"
 });

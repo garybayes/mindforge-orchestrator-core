@@ -18,7 +18,6 @@ import path from "path";
 
 import { logger } from "./logger";
 import { getEnv } from "./env";
-const env = getEnv();
 import { TelemetryPayload } from "./types";  // ⬅ NEW
 
 /**
@@ -51,6 +50,7 @@ export function writeTelemetry(
   payload: TelemetryPayload
 ): string {
   try {
+    const env = getEnv();
     const root = env.ORCHESTRATOR_TELEMETRY_ROOT; // default: "telemetry"
 
     // Repo-name scoped directory (no owner-level nesting)

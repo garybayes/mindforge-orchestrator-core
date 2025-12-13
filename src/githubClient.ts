@@ -8,7 +8,6 @@
 
 import { Octokit } from "@octokit/rest";
 import { getEnv } from "./env";
-const env = getEnv();
 import { logger } from "./logger";
 import {
   githubApiError,
@@ -21,6 +20,7 @@ import {
  */
 function createOctokit(): Octokit {
   logger.debug("Initializing Octokit GitHub client...");
+  const env = getEnv();
   return new Octokit({
     auth: env.GITHUB_TOKEN,
     userAgent: "mindforge-orchestrator-core/1.0.0",
