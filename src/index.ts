@@ -12,10 +12,13 @@ import { OrchestratorResult, TelemetryPayload } from "./types";
 import { github as ghClient } from "./githubClient";
 
 export async function run(deps: {
-  context: any;
-  getInput: (name: string) => string;
-  setOutput: (name: string, value: string) => void;
-  setFailed: (message: string) => void;
+  context: {
+    repo: { owner: string; repo: string };
+    payload: any;
+  };
+  getInput?: (name: string) => string;
+  setOutput?: (name: string, value: string) => void;
+  setFailed?: (message: string) => void;
 }) {
   const { context, getInput, setOutput, setFailed } = deps;
   const env = getEnv();
@@ -41,7 +44,7 @@ export async function run(deps: {
       return;
     }
 
-    const { owner, repo } = ctx.repo;
+    const { owner, repo } = context.repo;
     logger.info(`🔍 Processing issue #${issue.number} in ${owner}/${repo}`);
 
     const labels: string[] = (issue.labels || []).map((l: any) =>
@@ -169,15 +172,15 @@ export async function run(deps: {
       telemetryFile,
     };
 
-    core.setOutput("result", JSON.stringify(result));
-    core.info("✅ Orchestrator-core completed successfully.");
+    setOutput?.("result", JSON.stringify(result));
+    logger.info("✅ Orchestrator-core completed successfully.");
   } catch (err: any) {
     logger.error(err);
 
     if (err instanceof Error) {
-      core.setFailed(`❌ Orchestrator error: ${err.message}`);
+      setFailed?.(`❌ Orchestrator error: ${err.message}`);
     } else {
-      core.setFailed("❌ Orchestrator error: unknown error");
+      setFailed?.("❌ Orchestrator error: unknown error");
     }
 
     process.exitCode = 1;
