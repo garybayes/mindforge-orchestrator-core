@@ -58,5 +58,4 @@ All operations run within GitHub-hosted or self-hosted runners.
 
 📄 License
 MIT License.
-<!-- naming-migration seed commit -->
 
